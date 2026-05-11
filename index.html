@@ -1,0 +1,984 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shooting Stars UK — TikTok Live Creator Network</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── RESET & BASE ──────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080810;
+      --bg2:       #0d0d1a;
+      --surface:   #111124;
+      --border:    rgba(255,255,255,0.07);
+      --gold:      #e8c97e;
+      --gold2:     #f5dfa0;
+      --silver:    #c8d8f0;
+      --white:     #f0f0fa;
+      --muted:     rgba(200,216,240,0.55);
+      --font-head: 'Cormorant Garamond', serif;
+      --font-body: 'DM Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-weight: 300;
+      overflow-x: hidden;
+      line-height: 1.7;
+    }
+
+    /* ── STARFIELD CANVAS ──────────────────────────────────── */
+    #starfield {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── NAV ───────────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.4rem 5vw;
+      background: linear-gradient(to bottom, rgba(8,8,16,0.9) 0%, transparent 100%);
+      backdrop-filter: blur(4px);
+    }
+
+    .nav-logo {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 400;
+      letter-spacing: 0.18em;
+      color: var(--gold);
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.4rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 0.75rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+    .nav-links a:hover { color: var(--gold2); }
+
+    .nav-toggle {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 4px;
+    }
+    .nav-toggle span {
+      display: block;
+      width: 24px; height: 1.5px;
+      background: var(--gold);
+      transition: 0.3s;
+    }
+
+    /* ── HERO ──────────────────────────────────────────────── */
+    #hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 8rem 5vw 4rem;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(232,201,126,0.08) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -55%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1.4rem;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.2s forwards;
+    }
+
+    .hero-title {
+      font-family: var(--font-head);
+      font-size: clamp(3.2rem, 9vw, 7.5rem);
+      font-weight: 300;
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--white);
+      opacity: 0;
+      animation: fadeUp 1s 0.4s forwards;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--gold);
+      display: block;
+    }
+
+    .hero-star-line {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      margin: 2rem auto 0;
+      opacity: 0;
+      animation: fadeUp 1s 0.7s forwards;
+    }
+
+    .star-icon { color: var(--gold); font-size: 0.9rem; }
+    .hero-tagline {
+      font-size: clamp(0.9rem, 1.8vw, 1.1rem);
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      max-width: 520px;
+    }
+
+    .hero-cta {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      opacity: 0;
+      animation: fadeUp 1s 1s forwards;
+    }
+
+    .btn-primary {
+      padding: 0.85rem 2.2rem;
+      background: var(--gold);
+      color: #0a0a14;
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: background 0.25s, transform 0.2s;
+    }
+    .btn-primary:hover { background: var(--gold2); transform: translateY(-2px); }
+
+    .btn-ghost {
+      padding: 0.85rem 2.2rem;
+      background: transparent;
+      color: var(--silver);
+      font-family: var(--font-body);
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: border-color 0.25s, color 0.25s, transform 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
+
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.4rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      opacity: 0;
+      animation: fadeUp 1s 1.5s forwards;
+    }
+    .scroll-hint span {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .scroll-line {
+      width: 1px; height: 40px;
+      background: linear-gradient(to bottom, var(--gold), transparent);
+      animation: scrollPulse 2s infinite;
+    }
+
+    /* ── SECTION SHARED ────────────────────────────────────── */
+    section {
+      position: relative;
+      z-index: 1;
+    }
+
+    .section-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 5vw;
+    }
+
+    .section-label {
+      font-size: 0.68rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: var(--font-head);
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 300;
+      line-height: 1.15;
+      color: var(--white);
+    }
+
+    .section-title em {
+      font-style: italic;
+      color: var(--gold);
+    }
+
+    /* ── ABOUT ─────────────────────────────────────────────── */
+    #about {
+      padding: 10rem 0;
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      align-items: center;
+      margin-top: 4rem;
+    }
+
+    .about-left .section-title { margin-bottom: 1.8rem; }
+
+    .about-left p {
+      font-size: 1rem;
+      color: var(--muted);
+      margin-bottom: 1.2rem;
+    }
+
+    .about-left .highlight {
+      color: var(--silver);
+      font-weight: 400;
+    }
+
+    .free-badge {
+      display: inline-block;
+      margin-top: 1.2rem;
+      padding: 0.55rem 1.4rem;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+
+    .about-pillars {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .pillar {
+      padding: 1.6rem 1.8rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 2px solid var(--gold);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .pillar:hover {
+      background: #151528;
+      border-left-color: var(--gold2);
+    }
+
+    .pillar-icon {
+      font-size: 1.3rem;
+      margin-bottom: 0.6rem;
+      display: block;
+    }
+
+    .pillar h3 {
+      font-family: var(--font-head);
+      font-size: 1.15rem;
+      font-weight: 400;
+      color: var(--white);
+      margin-bottom: 0.35rem;
+    }
+
+    .pillar p {
+      font-size: 0.85rem;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── STATS BAR ─────────────────────────────────────────── */
+    .stats-bar {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 3rem 0;
+      margin: 0;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      text-align: center;
+      gap: 1rem;
+    }
+
+    .stat-item {
+      padding: 1.2rem;
+      border-right: 1px solid var(--border);
+    }
+    .stat-item:last-child { border-right: none; }
+
+    .stat-number {
+      font-family: var(--font-head);
+      font-size: clamp(2.4rem, 5vw, 3.8rem);
+      font-weight: 300;
+      color: var(--gold);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    /* ── GALLERY ───────────────────────────────────────────── */
+    #gallery {
+      padding: 10rem 0;
+    }
+
+    .gallery-header {
+      margin-bottom: 3.5rem;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: auto;
+      gap: 1rem;
+    }
+
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      aspect-ratio: 4/5;
+      background: var(--surface);
+      cursor: pointer;
+    }
+
+    .gallery-item:nth-child(1) { grid-column: span 2; aspect-ratio: 16/9; }
+    .gallery-item:nth-child(5) { grid-column: span 2; aspect-ratio: 16/9; }
+
+    .gallery-placeholder {
+      width: 100%; height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      background: linear-gradient(135deg, var(--surface) 0%, #161630 100%);
+      transition: transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    .gallery-item:hover .gallery-placeholder { transform: scale(1.03); }
+
+    .gallery-placeholder-icon {
+      font-size: 2rem;
+      opacity: 0.3;
+    }
+    .gallery-placeholder-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      opacity: 0.5;
+    }
+
+    /* unique tinted overlays per item */
+    .gallery-item:nth-child(1) .gallery-placeholder { background: linear-gradient(135deg, #0f0f25 0%, #1a1235 100%); }
+    .gallery-item:nth-child(2) .gallery-placeholder { background: linear-gradient(135deg, #10101f 0%, #181828 100%); }
+    .gallery-item:nth-child(3) .gallery-placeholder { background: linear-gradient(135deg, #0e0e20 0%, #1c1530 100%); }
+    .gallery-item:nth-child(4) .gallery-placeholder { background: linear-gradient(135deg, #111125 0%, #14162a 100%); }
+    .gallery-item:nth-child(5) .gallery-placeholder { background: linear-gradient(135deg, #0d0d22 0%, #181335 100%); }
+    .gallery-item:nth-child(6) .gallery-placeholder { background: linear-gradient(135deg, #0f1020 0%, #161428 100%); }
+
+    .gallery-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(8,8,16,0.85) 0%, transparent 60%);
+      display: flex;
+      align-items: flex-end;
+      padding: 1.4rem;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .gallery-item:hover .gallery-overlay { opacity: 1; }
+
+    .gallery-overlay-label {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      font-weight: 300;
+      color: var(--white);
+      letter-spacing: 0.06em;
+    }
+
+    /* shimmer decoration on gallery items */
+    .gallery-item::after {
+      content: '';
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(105deg, transparent 40%, rgba(232,201,126,0.04) 50%, transparent 60%);
+      transition: left 0.7s;
+    }
+    .gallery-item:hover::after { left: 150%; }
+
+    /* ── CONTACT ───────────────────────────────────────────── */
+    #contact {
+      padding: 10rem 0 8rem;
+    }
+
+    .contact-wrap {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 5rem;
+      align-items: start;
+    }
+
+    .contact-left .section-title { margin-bottom: 1.5rem; }
+    .contact-left p {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      line-height: 1.75;
+    }
+
+    .contact-info-item {
+      display: flex;
+      align-items: center;
+      gap: 0.9rem;
+      margin-bottom: 1.1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    .contact-info-item .ci-icon {
+      width: 32px; height: 32px;
+      border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      color: var(--gold);
+    }
+
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+
+    .form-group label {
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--white);
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 300;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: border-color 0.25s;
+      width: 100%;
+      -webkit-appearance: none;
+    }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color: rgba(200,216,240,0.25); }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--gold); }
+
+    .form-group select option { background: var(--bg2); }
+
+    .form-group textarea { resize: vertical; min-height: 130px; }
+
+    .form-submit { align-self: flex-start; }
+
+    /* ── FOOTER ────────────────────────────────────────────── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 3rem 5vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-logo {
+      font-family: var(--font-head);
+      font-size: 1rem;
+      letter-spacing: 0.16em;
+      color: var(--gold);
+      text-transform: uppercase;
+    }
+
+    .footer-copy {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+
+    .footer-links {
+      display: flex;
+      gap: 1.8rem;
+    }
+    .footer-links a {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.25s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+
+    /* ── ANIMATIONS ────────────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes scrollPulse {
+      0%   { opacity: 1; transform: scaleY(1); }
+      50%  { opacity: 0.4; transform: scaleY(0.6); }
+      100% { opacity: 1; transform: scaleY(1); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.8s ease, transform 0.8s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+
+    /* ── MOBILE ────────────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .nav-links { display: none; }
+      .nav-toggle { display: flex; }
+      .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        inset: 0;
+        background: rgba(8,8,16,0.97);
+        align-items: center;
+        justify-content: center;
+        gap: 2.5rem;
+        z-index: 99;
+      }
+      .nav-links.open a { font-size: 1.2rem; }
+
+      .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .stats-grid { grid-template-columns: repeat(3,1fr); }
+      .gallery-grid { grid-template-columns: 1fr 1fr; }
+      .gallery-item:nth-child(1),
+      .gallery-item:nth-child(5) { grid-column: span 2; aspect-ratio: 4/3; }
+      .contact-wrap { grid-template-columns: 1fr; gap: 3rem; }
+      .form-row { grid-template-columns: 1fr; }
+      footer { flex-direction: column; align-items: flex-start; gap: 1.2rem; }
+    }
+
+    @media (max-width: 540px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+      .stat-item:last-child { border-bottom: none; }
+      .gallery-grid { grid-template-columns: 1fr; }
+      .gallery-item:nth-child(1),
+      .gallery-item:nth-child(5) { grid-column: span 1; aspect-ratio: 4/3; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Starfield -->
+<canvas id="starfield"></canvas>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">Shooting Stars UK</a>
+  <button class="nav-toggle" id="navToggle" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="#about">About</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <p class="hero-eyebrow">✦ TikTok Live Creator Network</p>
+  <h1 class="hero-title">
+    Rise to the<br>
+    <em>Stars</em>
+  </h1>
+  <div class="hero-star-line">
+    <span class="star-icon">★</span>
+    <p class="hero-tagline">Where UK creators go live, grow fast, and earn more — completely free.</p>
+    <span class="star-icon">★</span>
+  </div>
+  <div class="hero-cta">
+    <a href="#contact" class="btn-primary">Join the Network</a>
+    <a href="#about" class="btn-ghost">Learn More</a>
+  </div>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- STATS BAR -->
+<div class="stats-bar">
+  <div class="section-inner">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <div class="stat-number">500+</div>
+        <div class="stat-label">Creators Supported</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">£0</div>
+        <div class="stat-label">Forever Free to Join</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number">24/7</div>
+        <div class="stat-label">Dedicated Support</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="section-inner">
+    <div class="about-grid">
+      <div class="about-left reveal">
+        <p class="section-label">Who We Are</p>
+        <h2 class="section-title">Built for creators,<br><em>by creators</em></h2>
+        <p>Shooting Stars UK is the UK's premier TikTok Live creator network, founded on one simple belief: <span class="highlight">every creator deserves the support to shine</span>, regardless of their starting point.</p>
+        <p>We connect ambitious TikTok Live creators with industry-leading expertise, exclusive resources, and a powerful community — giving you everything you need to <span class="highlight">maximise your revenue and grow your audience</span>.</p>
+        <p>And the best part? Every single thing we offer — every training session, every resource, every moment of support — is completely, genuinely <span class="highlight">free. No catches, no contracts, no commission cuts.</span></p>
+        <div class="free-badge">✦ Always Free · Always Yours</div>
+      </div>
+      <div class="about-pillars reveal reveal-delay-2">
+        <div class="pillar">
+          <span class="pillar-icon">💰</span>
+          <h3>Maximum Revenue</h3>
+          <p>We equip you with proven monetisation strategies tailored for TikTok Live — from gifting psychology to prime scheduling, we help you earn more every single stream.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-icon">🎓</span>
+          <h3>Elite Training</h3>
+          <p>Access structured programmes covering content strategy, audience growth, engagement tactics, and platform algorithm insights — all taught by top-performing creators.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-icon">🌟</span>
+          <h3>Dedicated Support</h3>
+          <p>A real team behind you, every step of the way. Got a question at midnight? We're there. Facing a challenge on stream? We've got you covered with personal, responsive guidance.</p>
+        </div>
+        <div class="pillar">
+          <span class="pillar-icon">🤝</span>
+          <h3>Creator Community</h3>
+          <p>Join a thriving network of like-minded UK creators. Collaborate, share wins, and grow together in an exclusive community where everyone pulls each other upward.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section id="gallery">
+  <div class="section-inner">
+    <div class="gallery-header reveal">
+      <p class="section-label">Creator Moments</p>
+      <h2 class="section-title">Our Stars, <em>In Action</em></h2>
+    </div>
+    <div class="gallery-grid">
+      <div class="gallery-item reveal">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">⭐</span>
+          <span class="gallery-placeholder-label">Featured Creator</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Live Stream Session</span></div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">🎬</span>
+          <span class="gallery-placeholder-label">Creator Spotlight</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Content Creation</span></div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">🏆</span>
+          <span class="gallery-placeholder-label">Top Performer</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Award Ceremony</span></div>
+      </div>
+      <div class="gallery-item reveal">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">🎤</span>
+          <span class="gallery-placeholder-label">Training Day</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Training Workshop</span></div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-1">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">✨</span>
+          <span class="gallery-placeholder-label">Community Event</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Creator Meetup</span></div>
+      </div>
+      <div class="gallery-item reveal reveal-delay-2">
+        <div class="gallery-placeholder">
+          <span class="gallery-placeholder-icon">📱</span>
+          <span class="gallery-placeholder-label">Behind the Scenes</span>
+        </div>
+        <div class="gallery-overlay"><span class="gallery-overlay-label">Behind the Scenes</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-inner">
+    <div class="contact-wrap">
+      <div class="contact-left reveal">
+        <p class="section-label">Get in Touch</p>
+        <h2 class="section-title">Ready to <em>Shine?</em></h2>
+        <p>Whether you're just starting out on TikTok Live or you're an established creator looking to level up, we'd love to hear from you. Fill out the form and a member of our team will be in touch shortly.</p>
+        <div class="contact-info-item">
+          <div class="ci-icon">✉</div>
+          <span>hello@shootingstarsuk.com</span>
+        </div>
+        <div class="contact-info-item">
+          <div class="ci-icon">📍</div>
+          <span>United Kingdom</span>
+        </div>
+        <div class="contact-info-item">
+          <div class="ci-icon">🎵</div>
+          <span>@ShootingStarsUK on TikTok</span>
+        </div>
+      </div>
+      <div class="contact-form reveal reveal-delay-2">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="Jane Smith" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" placeholder="jane@example.com" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="tiktok">TikTok Username</label>
+          <input type="text" id="tiktok" placeholder="@yourhandle" />
+        </div>
+        <div class="form-group">
+          <label for="level">Creator Level</label>
+          <select id="level">
+            <option value="" disabled selected>Select your level</option>
+            <option>Just Getting Started</option>
+            <option>Growing Creator (1k–10k followers)</option>
+            <option>Established Creator (10k–100k followers)</option>
+            <option>Top Creator (100k+ followers)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Message</label>
+          <textarea id="message" placeholder="Tell us a little about yourself and your goals…"></textarea>
+        </div>
+        <button class="btn-primary form-submit" type="button">Send Message ✦</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Shooting Stars UK</div>
+  <div class="footer-copy">© 2025 Shooting Stars UK. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#about">About</a>
+    <a href="#gallery">Gallery</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+  /* ── STARFIELD + SHOOTING STARS ──────────────────────────── */
+  const canvas = document.getElementById('starfield');
+  const ctx = canvas.getContext('2d');
+  let W, H, stars = [], shooters = [];
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  // Static stars
+  for (let i = 0; i < 220; i++) {
+    stars.push({
+      x: Math.random(),
+      y: Math.random(),
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random() * 0.7 + 0.15,
+      speed: Math.random() * 0.0003 + 0.0001
+    });
+  }
+
+  // Shooting star constructor
+  function spawnShooter() {
+    const angle = (Math.random() * 20 + 10) * Math.PI / 180;
+    return {
+      x: Math.random() * W * 1.2 - W * 0.1,
+      y: Math.random() * H * 0.5,
+      len: Math.random() * 180 + 80,
+      speed: Math.random() * 10 + 6,
+      angle,
+      dx: Math.cos(angle),
+      dy: Math.sin(angle),
+      alpha: 1,
+      fade: Math.random() * 0.012 + 0.008
+    };
+  }
+
+  function loop(ts) {
+    ctx.clearRect(0, 0, W, H);
+
+    // Twinkle static stars
+    stars.forEach(s => {
+      s.a += s.speed;
+      const a = 0.15 + Math.abs(Math.sin(s.a)) * 0.7;
+      ctx.beginPath();
+      ctx.arc(s.x * W, s.y * H, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(200,220,255,${a})`;
+      ctx.fill();
+    });
+
+    // Spawn shooting stars occasionally
+    if (Math.random() < 0.015) shooters.push(spawnShooter());
+
+    // Draw & update shooting stars
+    shooters = shooters.filter(s => {
+      ctx.save();
+      const grad = ctx.createLinearGradient(
+        s.x, s.y,
+        s.x - s.dx * s.len, s.y - s.dy * s.len
+      );
+      grad.addColorStop(0, `rgba(232,201,126,${s.alpha})`);
+      grad.addColorStop(0.4, `rgba(200,220,255,${s.alpha * 0.5})`);
+      grad.addColorStop(1, `rgba(200,220,255,0)`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(s.x, s.y);
+      ctx.lineTo(s.x - s.dx * s.len, s.y - s.dy * s.len);
+      ctx.stroke();
+      ctx.restore();
+
+      s.x += s.dx * s.speed;
+      s.y += s.dy * s.speed;
+      s.alpha -= s.fade;
+      return s.alpha > 0 && s.x < W + 100 && s.y < H + 100;
+    });
+
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+
+  /* ── NAV TOGGLE ──────────────────────────────────────────── */
+  const toggle = document.getElementById('navToggle');
+  const links  = document.getElementById('navLinks');
+  toggle.addEventListener('click', () => links.classList.toggle('open'));
+  links.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => links.classList.remove('open'));
+  });
+
+  /* ── SCROLL REVEAL ───────────────────────────────────────── */
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+</body>
+</html>
